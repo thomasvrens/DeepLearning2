@@ -8,11 +8,8 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch.nn import TripletMarginLoss
 
-
 cuda_available = torch.cuda.is_available()
 device = torch.device('cuda' if cuda_available else 'cpu')
-
-torch.set_default_dtype(torch.float64)
 
 data_dir = 'external_data'
 
@@ -34,13 +31,12 @@ triplet_loss = TripletMarginLoss(margin=1.0)
 
 model.train()
 
-
 num_epochs = 10
 for epoch in range(num_epochs):
 	epoch_loss = 0.0
-	batches = 0
+	iteration = 0
+
 	for anchor, positive, negative in dataloader:
-		batches += 1
 		optimizer.zero_grad()
 
 		anchor_embedding = model(anchor.to(device))
@@ -51,8 +47,9 @@ for epoch in range(num_epochs):
 		loss.backward()
 		optimizer.step()
 
-		epoch_loss += loss.item()  # Accumulate the loss
-		if batches > 1000:
-			break
+		epoch_loss += loss.item()
+		iteration += 1
+		if iteration % 1000 == 0:
+			print('Epoch [%d] [%d / %d] Average_Loss: %.5f' % (epoch + 1, iteration * bs, len(dataloader), epoch_loss/(iteration)))
 	# Print the average loss for the epoch
 	print(f"Epoch {epoch + 1}, Loss: {epoch_loss / len(dataloader)}")

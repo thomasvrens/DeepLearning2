@@ -4,7 +4,7 @@ import os
 import random
 import torch_geometric as pyg
 from utils import load_pickle
-torch.set_default_dtype(torch.float64)
+
 class Triplet_Dataset_RPLAN(torch.utils.data.Dataset):
 
     """
