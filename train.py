@@ -13,12 +13,12 @@ device = torch.device('cuda' if cuda_available else 'cpu')
 
 data_dir = 'external_data'
 
-bs = 16
+bs = 4
 dataset = Triplet_Dataset_RPLAN(data_dir)
 
 dataloader = DataLoader(dataset, batch_size=bs, shuffle=True)
 data_batch = next(iter(dataloader))
-
+print(len(dataset))
 num_node_features = 5
 hidden_dim = 64
 embedding_dim = 1024
@@ -50,6 +50,6 @@ for epoch in range(num_epochs):
 		epoch_loss += loss.item()
 		iteration += 1
 		if iteration % 1000 == 0:
-			print('Epoch [%d] [%d / %d] Average_Loss: %.5f' % (epoch + 1, iteration * bs, len(dataloader), epoch_loss/(iteration)))
+			print('Epoch [%d] [%d / %d] Average_Loss: %.5f' % (epoch + 1, iteration * bs, len(dataset), epoch_loss/(iteration * bs)))
 	# Print the average loss for the epoch
-	print(f"Epoch {epoch + 1}, Loss: {epoch_loss / len(dataloader)}")
+	print(f"Epoch {epoch + 1}, Loss: {epoch_loss / len(dataset)}")
