@@ -4,7 +4,7 @@ import os
 import random
 import torch_geometric as pyg
 from utils import load_pickle
-
+torch.set_default_dtype(torch.float64)
 class Triplet_Dataset_RPLAN(torch.utils.data.Dataset):
 
     """
@@ -38,24 +38,32 @@ class Triplet_Dataset_RPLAN(torch.utils.data.Dataset):
     def __getitem__(self, index):
         # TODO: graph transformations (??)
 
+
         # get identity pairs (saved as tuples of two integers)
         triplet = self.triplets[index]
 
         # get graphs (saved as networkx DiGraph() objects)
         # also: add order index ("0" for graph 1; "1" for graph 2)
         graphs = []
+        geo_graphs = []
         for i, id in enumerate(triplet):  # actually a 4-tuple: [a, p, a, n]
             graph = torch.load(os.path.join(self.graph_path, f'{id}'))
             graph.add_nodes_from([[n, {'order': i, 'id': id}] for n in graph.nodes()])
             graphs.append(graph)
+            geo_graph = pyg.utils.from_networkx(graph)
+            geo_graphs.append(geo_graph)
 
         # make large disconnected graph through unification of the two graphs
         graph_triplet = nx.disjoint_union_all(graphs)
 
         # make pytorch geometric graph
-        graph_triplet = pyg.utils.from_networkx(graph_triplet)
+        # graph_triplet = pyg.utils.from_networkx(graph_triplet)
 
-        return graph_triplet
+        anchor = geo_graphs[0]
+        positive = geo_graphs[1]
+        negative = geo_graphs[3]
+
+        return [anchor, positive, negative]
 
     def __len__(self):
         return len(self.triplets)
