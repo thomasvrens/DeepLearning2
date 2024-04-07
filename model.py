@@ -1,11 +1,8 @@
 import torch
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, global_mean_pool
 import torch.nn as nn
 import torch.nn.functional as F
 
-#embedding_dim = 1024
-#embedding_dim = 16
-#hidden_channels = 32
 class GCN(torch.nn.Module): #encoder
     def __init__(self, input_dim, hidden_dim, embedding_dim):
         super(GCN, self).__init__()
@@ -37,7 +34,9 @@ class CNN(nn.Module): #decoder
         self.bn2 = nn.BatchNorm2d(128)
         self.deconv3 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)
         self.bn3 = nn.BatchNorm2d(64)
-        self.deconv4 = nn.ConvTranspose2d(64, out_dims, kernel_size=4, stride=2, padding=1)
+        self.deconv4 = nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1)
+        self.bn4 = nn.BatchNorm2d(32)
+        self.deconv5 = nn.ConvTranspose2d(32, out_dims, kernel_size=4, stride=2, padding=1)
 
     def forward(self, x):
         x = self.project_lin(x)
@@ -57,9 +56,25 @@ class CNN(nn.Module): #decoder
         x = self.relu(x)
 
         x = self.deconv4(x)
+        x = self.bn4(x)
+        x = self.relu(x)
+
+        x = self.deconv5(x)
         x = F.softmax(x, dim = 1) #double check that the dimension here is correct <--- DIM = 2 i think
         # Want to softmax over the channel dimension
 
+        x = x.permute(0, 2, 3, 1)
         # Could still apply a softmax activation function here --> helpful with pixel classification
-        # Dont think we need that though
+        return x
+
+class GCN_CNN(nn.Module): #decoder
+    def __init__(self, input_dim, hidden_dim, embedding_dim, CNN_output_dim): #can add variable input dims
+        super(GCN_CNN, self).__init__()
+        self.GCN = GCN(input_dim, hidden_dim, embedding_dim)
+        self.CNN = CNN(CNN_output_dim)
+        self.triplet_embedding = None
+    def forward(self, x):
+        x = self.GCN(x)
+        self.triplet_embedding = x
+        x = self.CNN(x)
         return x

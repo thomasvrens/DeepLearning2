@@ -4,6 +4,9 @@ import os
 import random
 import torch_geometric as pyg
 from utils import load_pickle
+from constants import CAT_RPLAN
+from more_utils import img_to_class_mask
+import matplotlib.pyplot as plt
 
 class Triplet_Dataset_RPLAN(torch.utils.data.Dataset):
 
@@ -27,9 +30,11 @@ class Triplet_Dataset_RPLAN(torch.utils.data.Dataset):
                  graph_path='gmn-graph',
                  triplet_path='triplets_iou_74K.pickle',
                  shuffle=True,
+                 img_path='original',
                  mode='train'):
 
         self.graph_path = os.path.join(dir_rplan, graph_path)
+        self.img_path = os.path.join(dir_rplan, img_path)
         self.triplets = load_pickle('train_triplets_iou_74K.pickle')
         if shuffle: random.shuffle(self.triplets)
         # self.image_transform = image_transform
@@ -46,6 +51,7 @@ class Triplet_Dataset_RPLAN(torch.utils.data.Dataset):
         # also: add order index ("0" for graph 1; "1" for graph 2)
         graphs = []
         geo_graphs = []
+        true_img_msks = []
         for i, id in enumerate(triplet):  # actually a 4-tuple: [a, p, a, n]
             graph = torch.load(os.path.join(self.graph_path, f'{id}'))
             graph.add_nodes_from([[n, {'order': i, 'id': id}] for n in graph.nodes()])
@@ -53,17 +59,19 @@ class Triplet_Dataset_RPLAN(torch.utils.data.Dataset):
             geo_graph = pyg.utils.from_networkx(graph)
             geo_graphs.append(geo_graph)
 
-        # make large disconnected graph through unification of the two graphs
-        graph_triplet = nx.disjoint_union_all(graphs)
-
-        # make pytorch geometric graph
-        # graph_triplet = pyg.utils.from_networkx(graph_triplet)
+            img = plt.imread(os.path.join(self.img_path, f'{id}.png'))
+            true_img_msk = img_to_class_mask(img, len(CAT_RPLAN))
+            true_img_msks.append(true_img_msk)
 
         anchor = geo_graphs[0]
         positive = geo_graphs[1]
         negative = geo_graphs[3]
 
-        return [anchor, positive, negative]
+        anchor_true_msk = true_img_msks[0]
+        positive_true_msk = true_img_msks[1]
+        negative_true_msk = true_img_msks[3]
+
+        return [anchor, positive, negative, anchor_true_msk, positive_true_msk, negative_true_msk]
 
     def __len__(self):
         return len(self.triplets)
