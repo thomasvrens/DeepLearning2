@@ -9,6 +9,7 @@ import pickle
 import matplotlib.pyplot as plt
 from torch_geometric.nn import GCNConv
 from torch.nn import TripletMarginLoss
+import datetime
  
 cuda_available = torch.cuda.is_available()
 torch.backends.mps.is_available()
@@ -93,7 +94,10 @@ except KeyboardInterrupt:
 	with open(recon_save_str, 'wb') as f:
 		pickle.dump(recon_losses, f)
 
-	plt.plot(losses)
-	plt.plot(trip_losses)
-	plt.plot(recon_losses)
+	plt.plot(losses, label = 'total loss', color = 'r')
+	plt.plot(trip_losses, label = 'triplet loss', color = 'b', linestyle='--')
+	plt.plot(recon_losses, label = 'reconstruction loss', color = 'g', linestyle='--')
+	plt.title('Dual training loss over iterations')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
 	plt.show()
