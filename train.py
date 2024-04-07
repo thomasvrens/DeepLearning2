@@ -2,7 +2,7 @@ import torch.nn
 
 from dataset import Triplet_Dataset_RPLAN
 from torch_geometric.loader import DataLoader
-from model import GCN
+from model import GCN, CNN
 import torch.optim as optim
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
@@ -24,13 +24,17 @@ num_node_features = 5
 hidden_dim = 64
 embedding_dim = 1024
 
-model = GCN(num_node_features, hidden_dim, embedding_dim)
-model = model.to(device)
+GCN_model = GCN(num_node_features, hidden_dim, embedding_dim)
+GCN_model = GCN_model.to(device)
 
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+CNN_model = CNN(9) # can add more inputs later, hard coded for now
+CNN_model = CNN_model.to(device)
+
+optimizer = optim.Adam(GCN_model.parameters(), lr=0.001)
 triplet_loss = TripletMarginLoss(margin=1.0)
 
-model.train()
+GCN_model.train()
+CNN_model.train()
 
 num_epochs = 10
 for epoch in range(num_epochs):
@@ -40,11 +44,22 @@ for epoch in range(num_epochs):
 	for anchor, positive, negative in dataloader:
 		optimizer.zero_grad()
 
-		anchor_embedding = model(anchor.to(device))
-		positive_embedding = model(positive.to(device))
-		negative_embedding = model(negative.to(device))
+		anchor_embedding = GCN_model(anchor.to(device))
+		positive_embedding = GCN_model(positive.to(device))
+		negative_embedding = GCN_model(negative.to(device))
 
-		loss = triplet_loss(anchor_embedding, positive_embedding, negative_embedding)
+		anchor_reconstruction = CNN_model(anchor_embedding)
+		#positive_reconstruction = CNN_model(positive_embedding)
+		#negative_reconstruction = CNN_model(negative_embedding)
+
+		anchor_img, positive_img, negative_img = None, None, None
+
+		triplet_loss = triplet_loss(anchor_embedding, positive_embedding, negative_embedding)
+		#recon_loss = F.mse_loss(anchor_reconstruction, anchor_img) + F.mse_loss(positive_reconstruction, positiv_img) + F.mse_loss(negative_reconstruction, negative_img)
+		recon_loss = F.mse_loss(anchor_reconstruction, anchor_img)
+
+
+		loss = triplet_loss + recon_loss
 		loss.backward()
 		optimizer.step()
 
