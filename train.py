@@ -7,8 +7,9 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch.nn import TripletMarginLoss
-
+ 
 cuda_available = torch.cuda.is_available()
+mps_available = print(torch.backends.mps.is_available())
 device = torch.device('cuda' if cuda_available else 'cpu')
 
 data_dir = 'external_data'
