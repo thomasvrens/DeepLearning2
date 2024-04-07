@@ -13,7 +13,7 @@ device = torch.device('cuda' if cuda_available else 'cpu')
 
 data_dir = 'external_data'
 
-bs = 4
+bs = 8
 dataset = Triplet_Dataset_RPLAN(data_dir)
 
 dataloader = DataLoader(dataset, batch_size=bs, shuffle=True)
