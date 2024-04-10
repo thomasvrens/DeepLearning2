@@ -9,7 +9,8 @@ import pickle
 import matplotlib.pyplot as plt
 from torch_geometric.nn import GCNConv
 from torch.nn import TripletMarginLoss
-import datetime
+from datetime import datetime
+import numpy as np
  
 cuda_available = torch.cuda.is_available()
 torch.backends.mps.is_available()
@@ -23,8 +24,8 @@ dataset = Triplet_Dataset_RPLAN(data_dir)
 dataloader = DataLoader(dataset, batch_size=bs, shuffle=True)
 
 num_node_features = 5
-hidden_dim = 64
-embedding_dim = 1024
+hidden_dim = 16
+embedding_dim = 256
 CNN_output_dim = 18
 
 model = GCN_CNN(num_node_features, hidden_dim, embedding_dim, CNN_output_dim)
@@ -39,7 +40,39 @@ losses = []
 trip_losses = []
 recon_losses = []
 
+
+def moving_average(data, window_size):
+    """
+    Smooths the data using a moving average filter.
+
+    Parameters:
+    - data: The input data to be smoothed (a list or numpy array).
+    - window_size: The number of data points to include in the moving average window.
+
+    Returns:
+    - smoothed_data: The smoothed data.
+    """
+    if window_size <= 1:
+        return data  # No smoothing needed for window_size 1 or less
+
+    # Ensure data is a numpy array for easy slicing
+    data = np.array(data)
+
+    # Pre-allocate smoothed_data array
+    smoothed_data = np.zeros(len(data))
+
+    # Calculate the moving average
+    for i in range(len(data)):
+        # Determine the window range
+        start = max(0, i - window_size // 2)
+        end = min(len(data), i + window_size // 2 + 1)
+        smoothed_data[i] = np.mean(data[start:end])
+
+    return smoothed_data
+
 num_epochs = 10
+triplet_scaler = 1
+
 try:
 	for epoch in range(num_epochs):
 		epoch_loss = 0.0
@@ -56,14 +89,15 @@ try:
 
 			negative_prediction = model(negative.to(device))
 			negative_embedding = model.triplet_embedding
-
+			#print(anchor_embedding.size(), anchor_true_msk.size(), anchor_prediction.size())
 			triplet_loss = triplet_loss_fnct(anchor_embedding, positive_embedding, negative_embedding)
-			#recon_loss = F.mse_loss(anchor_reconstruction, anchor_img) + F.mse_loss(positive_reconstruction, positiv_img) + F.mse_loss(negative_reconstruction, negative_img)
+			recon_loss = F.mse_loss(anchor_prediction, anchor_true_msk.to(device).float()) + F.mse_loss(positive_prediction, positive_true_msk.to(device).float()) + F.mse_loss(negative_prediction, negative_true_msk.to(device).float())
 			#print(anchor_true_msk.size())
 
-			recon_loss = F.mse_loss(anchor_prediction, anchor_true_msk.to(device).float())
-
-			loss = triplet_loss + recon_loss
+			# recon_loss = F.mse_loss(anchor_prediction, anchor_true_msk.to(device).float())
+			#print(f'recon loss{recon_loss}')
+			#print(f'triplet loss{triplet_loss}')
+			loss = triplet_scaler * triplet_loss + recon_loss
 			loss.backward()
 			optimizer.step()
 
@@ -98,6 +132,86 @@ except KeyboardInterrupt:
 	plt.plot(trip_losses, label = 'triplet loss', color = 'b', linestyle='--')
 	plt.plot(recon_losses, label = 'reconstruction loss', color = 'g', linestyle='--')
 	plt.title('Dual training loss over iterations')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 50
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 50)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 100
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 100)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 200
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 200)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 500
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 500)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 1000
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 1000)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 5000
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 5000)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 10000
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 10000)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 20000
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 20000)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 50000
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 50000)')
+	plt.xlabel('Training Iteration')
+	plt.ylabel('Loss')
+	plt.show()
+
+	window_size = 74743
+	smoothed_loss = moving_average(losses, window_size)
+	plt.plot(smoothed_loss)
+	plt.title('Dual training loss over iterations (window = 74743)')
 	plt.xlabel('Training Iteration')
 	plt.ylabel('Loss')
 	plt.show()
