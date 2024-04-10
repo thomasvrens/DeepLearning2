@@ -24,8 +24,8 @@ dataset = Triplet_Dataset_RPLAN(data_dir)
 dataloader = DataLoader(dataset, batch_size=bs, shuffle=True)
 
 num_node_features = 5
-hidden_dim = 16
-embedding_dim = 256
+hidden_dim = 128
+embedding_dim = 1024
 CNN_output_dim = 18
 
 model = GCN_CNN(num_node_features, hidden_dim, embedding_dim, CNN_output_dim)
@@ -70,8 +70,8 @@ def moving_average(data, window_size):
 
     return smoothed_data
 
-num_epochs = 10
-triplet_scaler = 1
+num_epochs = 4
+triplet_scaler = 0
 
 try:
 	for epoch in range(num_epochs):
@@ -109,7 +109,10 @@ try:
 			recon_losses.append(recon_loss.item())
 
 			if iteration % 1000 == 0:
-				print('Epoch [%d] [%d / %d] Average_Loss: %.5f' % (epoch + 1, iteration * bs, len(dataset), epoch_loss/(iteration * bs)))
+				print('Epoch [%d] [%d / %d] Average_Loss: %.5f' % (epoch + 1, iteration * bs, len(dataset), epoch_loss/(iteration * bs)),end='  ')
+				print(f'triplet loss {triplet_loss} -> {triplet_scaler * triplet_loss}, and recon loss {recon_loss}')
+		if epoch > 2:
+			triplet_scaler = 0.001
 		# Print the average loss for the epoch
 		print(f"Epoch {epoch + 1}, Loss: {epoch_loss / len(dataset)}")
 
