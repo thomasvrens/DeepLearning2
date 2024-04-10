@@ -93,7 +93,7 @@ try:
 			triplet_loss = 0
 			if epoch > 2:
 				triplet_loss = triplet_loss_fnct(anchor_embedding, positive_embedding, negative_embedding)
-
+				trip_losses.append(triplet_loss.item())
 			recon_loss = F.mse_loss(anchor_prediction, anchor_true_msk.to(device).float()) + F.mse_loss(positive_prediction, positive_true_msk.to(device).float()) + F.mse_loss(negative_prediction, negative_true_msk.to(device).float())
 			#print(anchor_true_msk.size())
 
@@ -108,7 +108,7 @@ try:
 			iteration += 1
 
 			losses.append(loss.item())
-			trip_losses.append(triplet_loss.item())
+			# trip_losses.append(triplet_loss.item())
 			recon_losses.append(recon_loss.item())
 
 			if iteration % 1000 == 0:
