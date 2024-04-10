@@ -90,7 +90,10 @@ try:
 			negative_prediction = model(negative.to(device))
 			negative_embedding = model.triplet_embedding
 			#print(anchor_embedding.size(), anchor_true_msk.size(), anchor_prediction.size())
-			triplet_loss = triplet_loss_fnct(anchor_embedding, positive_embedding, negative_embedding)
+			triplet_loss = 0
+			if epoch > 2:
+				triplet_loss = triplet_loss_fnct(anchor_embedding, positive_embedding, negative_embedding)
+
 			recon_loss = F.mse_loss(anchor_prediction, anchor_true_msk.to(device).float()) + F.mse_loss(positive_prediction, positive_true_msk.to(device).float()) + F.mse_loss(negative_prediction, negative_true_msk.to(device).float())
 			#print(anchor_true_msk.size())
 
