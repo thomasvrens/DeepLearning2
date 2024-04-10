@@ -71,7 +71,7 @@ def moving_average(data, window_size):
     return smoothed_data
 
 num_epochs = 4
-triplet_scaler = 0
+triplet_scaler = 0.01
 
 try:
 	for epoch in range(num_epochs):
@@ -90,10 +90,9 @@ try:
 			negative_prediction = model(negative.to(device))
 			negative_embedding = model.triplet_embedding
 			#print(anchor_embedding.size(), anchor_true_msk.size(), anchor_prediction.size())
-			triplet_loss = 0
-			if epoch > 2:
-				triplet_loss = triplet_loss_fnct(anchor_embedding, positive_embedding, negative_embedding)
-				trip_losses.append(triplet_loss.item())
+			# if epoch > 2:
+			triplet_loss = triplet_loss_fnct(anchor_embedding, positive_embedding, negative_embedding)
+			trip_losses.append(triplet_loss.item())
 			recon_loss = F.mse_loss(anchor_prediction, anchor_true_msk.to(device).float()) + F.mse_loss(positive_prediction, positive_true_msk.to(device).float()) + F.mse_loss(negative_prediction, negative_true_msk.to(device).float())
 			#print(anchor_true_msk.size())
 
@@ -114,8 +113,8 @@ try:
 			if iteration % 1000 == 0:
 				print('Epoch [%d] [%d / %d] Average_Loss: %.5f' % (epoch + 1, iteration * bs, len(dataset), epoch_loss/(iteration * bs)),end='  ')
 				print(f'triplet loss {triplet_loss} -> {triplet_scaler * triplet_loss}, and recon loss {recon_loss}')
-		if epoch > 2:
-			triplet_scaler = 0.001
+		# if epoch > 2:
+		# 	triplet_scaler = 0.001
 		# Print the average loss for the epoch
 		print(f"Epoch {epoch + 1}, Loss: {epoch_loss / len(dataset)}")
 
