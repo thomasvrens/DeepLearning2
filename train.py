@@ -220,3 +220,103 @@ except KeyboardInterrupt:
 	plt.xlabel('Training Iteration')
 	plt.ylabel('Loss')
 	plt.show()
+
+pickle_dir = 'losses'
+total_save_str = f'{pickle_dir}/{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-total_losses.pickle'
+trip_save_str = f'{pickle_dir}/{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-triplet_losses.pickle'
+recon_save_str = f'{pickle_dir}/{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-recon_losses.pickle'
+
+with open(total_save_str, 'wb') as f:
+	pickle.dump(losses, f)
+with open(trip_save_str, 'wb') as f:
+	pickle.dump(trip_losses, f)
+with open(recon_save_str, 'wb') as f:
+	pickle.dump(recon_losses, f)
+
+plt.plot(losses, label = 'total loss', color = 'r')
+plt.plot(trip_losses, label = 'triplet loss', color = 'b', linestyle='--')
+plt.plot(recon_losses, label = 'reconstruction loss', color = 'g', linestyle='--')
+plt.title('Dual training loss over iterations')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 50
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 50)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 100
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 100)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 200
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 200)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 500
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 500)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 1000
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 1000)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 5000
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 5000)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 10000
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 10000)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 20000
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 20000)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 50000
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 50000)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
+
+window_size = 74743
+smoothed_loss = moving_average(losses, window_size)
+plt.plot(smoothed_loss)
+plt.title('Dual training loss over iterations (window = 74743)')
+plt.xlabel('Training Iteration')
+plt.ylabel('Loss')
+plt.show()
