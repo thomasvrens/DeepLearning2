@@ -7,7 +7,6 @@ import torch.optim as optim
 import torch.nn.functional as F
 import pickle
 import matplotlib.pyplot as plt
-from torch_geometric.nn import GCNConv
 from torch.nn import TripletMarginLoss
 from datetime import datetime
 import numpy as np
@@ -43,31 +42,19 @@ recon_losses = []
 
 def moving_average(data, window_size):
     """
-    Smooths the data using a moving average filter.
-
-    Parameters:
-    - data: The input data to be smoothed (a list or numpy array).
-    - window_size: The number of data points to include in the moving average window.
-
-    Returns:
-    - smoothed_data: The smoothed data.
+    Not our code. Used to plot the losses
     """
     if window_size <= 1:
-        return data  # No smoothing needed for window_size 1 or less
+        return data
 
-    # Ensure data is a numpy array for easy slicing
     data = np.array(data)
 
-    # Pre-allocate smoothed_data array
     smoothed_data = np.zeros(len(data))
 
-    # Calculate the moving average
     for i in range(len(data)):
-        # Determine the window range
         start = max(0, i - window_size // 2)
         end = min(len(data), i + window_size // 2 + 1)
         smoothed_data[i] = np.mean(data[start:end])
-
     return smoothed_data
 
 num_epochs = 4

@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 class Triplet_Dataset_RPLAN(torch.utils.data.Dataset):
 
     """
+    Modified this code from our external superviser to work with our model:
+
     Geometry Triplet Graph Dataset for RPLAN.
 
     Generates a graph pair as a single Data() object.
